@@ -1,95 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIH Ocean Disaster & State Monitor</title>
-  
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="style.css">
-  
-  <!-- Three.js Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCEANX - 3D Ocean Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 
-  <!-- The 3D Render Canvas -->
-  <div id="canvas-container"></div>
+    <div class="dashboard">
+        <!-- Top Navigation -->
+        <header class="top-bar">
+            <div class="logo-area">
+                <h1>OCEANX</h1>
+                <span class="subtitle">3D OCEAN INTELLIGENCE PLATFORM</span>
+            </div>
+            <div class="system-status">
+                <div class="status-dot"></div>
+                SYSTEM ONLINE
+            </div>
+        </header>
 
-  <!-- Foreground Interface -->
-  <div class="ui-layer">
-    
-    <div class="header">
-      <h1>OceanSys : Advanced Monitoring</h1>
-      <button class="view-toggle" id="view-toggle-btn">Enter 2D Flat View</button>
+        <!-- Main Layout -->
+        <main class="main-content">
+            
+            <!-- Left Sidebar -->
+            <aside class="sidebar left-sidebar">
+                <!-- Variables Panel -->
+                <div class="panel">
+                    <h2 class="panel-header">OCEAN VARIABLES</h2>
+                    
+                    <div class="control-group">
+                        <label>Variable</label>
+                        <select class="custom-select">
+                            <option>Chlorophyll</option>
+                            <option>Salinity</option>
+                            <option>Temperature</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="slider-header">
+                            <label>Depth</label>
+                            <span id="depth-val">458 m</span>
+                        </div>
+                        <input type="range" id="depth-slider" min="0" max="11000" value="458">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="slider-header">
+                            <label>Vertical Exaggeration</label>
+                            <span id="vert-val">1x</span>
+                        </div>
+                        <input type="range" id="vert-slider" min="1" max="10" value="1">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="slider-header">
+                            <label>Layer Opacity</label>
+                            <span id="opac-val">78%</span>
+                        </div>
+                        <input type="range" id="opac-slider" min="0" max="100" value="78">
+                    </div>
+                </div>
+
+                <!-- Visualization Panel -->
+                <div class="panel">
+                    <h2 class="panel-header">VISUALIZATION</h2>
+                    <div class="button-grid">
+                        <button class="tool-btn active">🌡️ Temperature</button>
+                        <button class="tool-btn">🌊 Currents</button>
+                    </div>
+                </div>
+
+                <!-- Anomaly Scanner -->
+                <div class="panel anomaly-panel">
+                    <h2 class="panel-header">OCEAN ANOMALY SCANNER</h2>
+                    <div class="anomaly-value">+1.9°C</div>
+                    <p class="anomaly-desc">Temperature anomaly detected in Arabian Sea region.</p>
+                    <div class="anomaly-class">Classification: Marine Heatwave</div>
+                </div>
+            </aside>
+
+            <!-- Center Stage (3D Canvas) -->
+            <section class="center-stage">
+                <div class="disaster-banner">
+                    ⚠️ DISASTER MODE ACTIVE — SIMULATED HAZARD ENVIRONMENT
+                </div>
+                
+                <div id="canvas-container"></div>
+
+                <!-- Floating Data Card -->
+                <div class="floating-card">
+                    <h3>ARGO-1024</h3>
+                    <div class="data-row"><span class="data-label">Latitude</span><span class="data-val">14.2° N</span></div>
+                    <div class="data-row"><span class="data-label">Longitude</span><span class="data-val">72.8° E</span></div>
+                    <div class="data-row"><span class="data-label">Depth</span><span class="data-val">2000 m</span></div>
+                    <div class="data-row"><span class="data-label">Temperature</span><span class="data-val">28.1 °C</span></div>
+                    <div class="data-row"><span class="data-label">Salinity</span><span class="data-val">34.8 PSU</span></div>
+                    <div class="data-row"><span class="data-label">Last Update</span><span class="data-val">08 Sep 2026</span></div>
+                </div>
+            </section>
+
+            <!-- Right Sidebar -->
+            <aside class="sidebar right-sidebar">
+                <!-- Alerts Panel -->
+                <div class="panel">
+                    <div class="panel-header-flex">
+                        <h2>ACTIVE ALERTS</h2>
+                        <span class="badge">03</span>
+                    </div>
+                    
+                    <div class="alert-card alert-high">
+                        <div class="alert-title">HIGH — Marine Heat Anomaly</div>
+                        <div class="alert-desc">Arabian Sea • +1.9°C above reference</div>
+                    </div>
+                    <div class="alert-card alert-mod">
+                        <div class="alert-title">MODERATE — Current Velocity</div>
+                        <div class="alert-desc">Western Indian Ocean</div>
+                    </div>
+                    <div class="alert-card alert-watch">
+                        <div class="alert-title">WATCH — Cyclonic System</div>
+                        <div class="alert-desc">Simulated Arabian Sea track</div>
+                    </div>
+                </div>
+
+                <!-- Instruments Panel -->
+                <div class="panel">
+                    <h2 class="panel-header">NEARBY INSTRUMENTS</h2>
+                    <div class="instrument-row">
+                        <div>
+                            <div class="inst-name">ARGO-1024</div>
+                            <div class="inst-loc">14.2°N • 72.8°E • 0-2000m</div>
+                        </div>
+                        <div class="inst-type">ARGO</div>
+                    </div>
+                </div>
+
+                <!-- Copilot Panel -->
+                <div class="panel copilot-panel">
+                    <h2 class="panel-header">🤖 OCEAN COPILOT</h2>
+                    <p class="copilot-desc">Ask questions about the currently visualized ocean conditions.</p>
+                    <div class="chat-input-area">
+                        <input type="text" placeholder="Ask about the ocean..." class="chat-input">
+                        <button class="send-btn">→</button>
+                    </div>
+                </div>
+            </aside>
+
+        </main>
+
+        <!-- Bottom Timeline -->
+        <footer class="bottom-bar">
+            <div class="timeline-container">
+                <span class="time-label">MODEL TIME</span>
+                <input type="range" class="timeline-slider" value="50">
+                <span class="time-value">08 SEP 2026 • 07:00 UTC</span>
+            </div>
+            <div class="playback-controls">
+                <button class="play-btn">◀</button>
+                <button class="play-btn active">▶ PLAY</button>
+                <button class="play-btn">▶▶</button>
+            </div>
+        </footer>
     </div>
 
-    <div class="content">
-      
-      <!-- Left Panel: Science Variables & Depth Explorer -->
-      <div class="left-panel">
-        <div class="panel">
-          <span class="control-label">Ocean State Variables</span>
-          <div class="btn-grid">
-            <button class="var-btn active" data-var="temperature">Temperature</button>
-            <button class="var-btn" data-var="salinity">Salinity</button>
-            <button class="var-btn" data-var="currents">Currents</button>
-            <button class="var-btn" data-var="chlorophyll">Chlorophyll</button>
-          </div>
-          <p class="panel-desc">Select a variable to map onto the 3D globe visualization.</p>
-        </div>
-
-        <div class="panel">
-          <span class="control-label">Depth Exploration : <span id="depth-val" class="accent-text">0</span> m</span>
-          <input type="range" id="depth-slider" min="0" max="11000" value="0" step="10">
-          
-          <div>
-            <div class="stat-box">
-              <span class="stat-label">Water Temp</span>
-              <span class="stat-val" id="temp-val">28.5 °C</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">Hydrostatic Pressure</span>
-              <span class="stat-val" id="pressure-val">1 atm</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">Light Penetration</span>
-              <span class="stat-val" id="light-val">100%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Panel: Disaster Management -->
-      <div class="right-panel">
-        <div class="panel disaster-panel">
-          <span class="control-label text-red">Disaster Command Center</span>
-          
-          <div class="warning-box tsunami-alert">
-            <div class="warning-title">⚠️ Tsunami Early Warning</div>
-            <p class="warning-text">Seismic anomaly detected (M7.8) near the Sunda Trench. Real-time INCOIS buoy monitoring active. Estimated landfall at coastal regions in 45 mins. Evacuation protocols initiated.</p>
-          </div>
-
-          <div class="warning-box cyclone-alert">
-            <div class="warning-title text-orange">🌀 Cyclone Tracker: 'Biparjoy'</div>
-            <p class="warning-text text-light-orange">Severe cyclonic storm tracking over Arabian Sea. Ocean heat content (OHC) extremely high (>100 kJ/cm²), providing ideal conditions for rapid intensification.</p>
-          </div>
-          
-          <div class="warning-box heatwave-alert">
-            <div class="warning-title text-cyan">🌡️ Marine Heatwave Alert</div>
-            <p class="warning-text text-light-cyan">Sea Surface Temperature (SST) +2.5°C above decadal average in the Lakshadweep Sea. Immediate risk of mass coral bleaching observed.</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Custom JavaScript -->
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
