@@ -1,0 +1,6 @@
+{
+  "name": "OCEAN X - 3D XYZ Ocean Slicer",
+  "description": "Interactive 3D ocean basin depth slicer, water column stratification, and real-time hydrodynamics visualizer.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
