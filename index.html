@@ -5,12 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OCEANX - 3D Ocean Intelligence</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- External 3D Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #060913;
+            --panel-bg: rgba(11, 17, 32, 0.75);
+            --panel-border: rgba(45, 61, 94, 0.6);
+            --text-main: #e2e8f0;
+            --text-muted: #8493a8;
+            --accent-cyan: #00f0ff;
+            --accent-red: #ff3366;
+            --accent-pink: #d946ef;
+            --font-ui: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-main); color: var(--text-main);
+            font-family: var(--font-ui); overflow: hidden; height: 100vh;
+        }
+
+        .dashboard { display: flex; flex-direction: column; height: 100vh; padding: 12px; box-sizing: border-box; }
+
+        /* HEADER */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--panel-border); margin-bottom: 12px; }
+        .logo-area h1 { margin: 0; font-size: 22px; letter-spacing: 4px; font-weight: 700; }
+        .logo-area .subtitle { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+        .system-status { display: flex; align-items: center; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
+        .status-dot { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; margin-right: 8px; box-shadow: 0 0 8px #10b981; }
+
+        /* MAIN LAYOUT */
+        .main-content { display: flex; flex: 1; gap: 16px; overflow: hidden; }
+        .sidebar { width: 340px; display: flex; flex-direction: column; gap: 16px; z-index: 10; }
+
+        /* PANELS */
+        .panel { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 8px; padding: 20px; backdrop-filter: blur(10px); }
+        .panel-header { font-size: 11px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin: 0 0 20px 0; font-weight: 600; }
+        .panel-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .panel-header-flex h2 { font-size: 11px; letter-spacing: 2px; color: var(--text-muted); margin: 0; }
+        .badge { background: var(--accent-red); color: white; font-size: 10px; padding: 2px 6px; border-radius: 12px; }
+
+        /* CONTROLS */
+        .control-group { margin-bottom: 20px; }
+        .control-group label { display: block; font-size: 12px; color: var(--text-main); margin-bottom: 8px; }
+        .custom-select { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border); color: var(--text-main); padding: 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 13px; outline: none; }
+        .slider-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .slider-header span { font-size: 12px; font-family: var(--font-mono); color: var(--text-main); }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: var(--panel-border); border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: var(--accent-cyan); margin-top: -5px; cursor: pointer; box-shadow: 0 0 10px var(--accent-cyan); }
+
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tool-btn { background: transparent; border: 1px solid var(--panel-border); color: var(--text-muted); padding: 10px; border-radius: 4px; cursor: pointer; font-family: var(--font-ui); font-size: 12px; transition: 0.2s; }
+        .tool-btn.active { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(0, 240, 255, 0.05); }
+
+        /* ANOMALY SCANNER */
+        .anomaly-panel { border-color: rgba(0, 240, 255, 0.3); }
+        .anomaly-value { font-size: 28px; font-weight: 700; color: white; margin-bottom: 8px; font-family: var(--font-mono); }
+        .anomaly-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; }
+        .anomaly-class { font-size: 11px; color: var(--accent-cyan); }
+
+        /* ALERTS */
+        .alert-card { padding: 12px; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid; background: rgba(0,0,0,0.2); }
+        .alert-high { border-left-color: var(--accent-red); }
+        .alert-mod { border-left-color: var(--accent-cyan); }
+        .alert-watch { border-left-color: var(--text-muted); }
+        .alert-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; color: white; }
+        .alert-desc { font-size: 11px; color: var(--text-muted); }
+
+        /* INSTRUMENTS */
+        .instrument-row { display: flex; justify-content: space-between; align-items: center; }
+        .inst-name { font-size: 13px; font-weight: 600; color: white; }
+        .inst-loc { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px; }
+        .inst-type { font-size: 10px; color: var(--accent-cyan); border: 1px solid var(--accent-cyan); padding: 2px 6px; border-radius: 4px; }
+
+        /* COPILOT */
+        .copilot-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+        .chat-input-area { display: flex; gap: 8px; }
+        .chat-input { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--panel-border); color: white; padding: 10px; border-radius: 4px; font-size: 12px; outline: none; }
+        .send-btn { background: var(--panel-border); color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; }
+        .send-btn:hover { background: var(--accent-cyan); color: black; }
+
+        /* CENTER STAGE */
+        .center-stage { flex: 1; position: relative; border-radius: 8px; border: 1px solid var(--panel-border); background: radial-gradient(circle at center, #1a0f2e 0%, #060913 70%); overflow: hidden; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .disaster-banner { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(220, 38, 38, 0.15); border: 1px solid var(--accent-red); color: var(--accent-red); padding: 8px 24px; border-radius: 20px; font-size: 11px; letter-spacing: 1px; font-weight: 600; z-index: 10; backdrop-filter: blur(4px); }
+        
+        .floating-card { position: absolute; bottom: 40px; right: 40px; background: var(--panel-bg); border: 1px solid rgba(217, 70, 239, 0.3); padding: 20px; border-radius: 8px; width: 260px; z-index: 10; backdrop-filter: blur(10px); }
+        .floating-card h3 { margin: 0 0 16px 0; color: var(--accent-cyan); font-size: 16px; font-family: var(--font-mono); }
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+        .data-label { color: var(--text-muted); }
+        .data-val { color: white; font-family: var(--font-mono); }
+
+        /* BOTTOM BAR */
+        .bottom-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 16px 20px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 8px; backdrop-filter: blur(10px); }
+        .timeline-container { display: flex; align-items: center; gap: 20px; flex: 1; margin-right: 40px; }
+        .time-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; }
+        .timeline-slider { flex: 1; }
+        .time-value { font-size: 12px; font-family: var(--font-mono); color: var(--text-main); }
+        .playback-controls { display: flex; gap: 8px; }
+        .play-btn { background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border); color: var(--text-muted); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 11px; letter-spacing: 1px; }
+        .play-btn.active { background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.3); }
+    </style>
 </head>
 <body>
-
     <div class="dashboard">
         <!-- Top Navigation -->
         <header class="top-bar">
@@ -26,13 +130,10 @@
 
         <!-- Main Layout -->
         <main class="main-content">
-            
             <!-- Left Sidebar -->
             <aside class="sidebar left-sidebar">
-                <!-- Variables Panel -->
                 <div class="panel">
                     <h2 class="panel-header">OCEAN VARIABLES</h2>
-                    
                     <div class="control-group">
                         <label>Variable</label>
                         <select class="custom-select">
@@ -41,33 +142,20 @@
                             <option>Temperature</option>
                         </select>
                     </div>
-
                     <div class="control-group">
-                        <div class="slider-header">
-                            <label>Depth</label>
-                            <span id="depth-val">458 m</span>
-                        </div>
+                        <div class="slider-header"><label>Depth</label><span id="depth-val">458 m</span></div>
                         <input type="range" id="depth-slider" min="0" max="11000" value="458">
                     </div>
-
                     <div class="control-group">
-                        <div class="slider-header">
-                            <label>Vertical Exaggeration</label>
-                            <span id="vert-val">1x</span>
-                        </div>
+                        <div class="slider-header"><label>Vertical Exaggeration</label><span id="vert-val">1x</span></div>
                         <input type="range" id="vert-slider" min="1" max="10" value="1">
                     </div>
-
                     <div class="control-group">
-                        <div class="slider-header">
-                            <label>Layer Opacity</label>
-                            <span id="opac-val">78%</span>
-                        </div>
+                        <div class="slider-header"><label>Layer Opacity</label><span id="opac-val">78%</span></div>
                         <input type="range" id="opac-slider" min="0" max="100" value="78">
                     </div>
                 </div>
 
-                <!-- Visualization Panel -->
                 <div class="panel">
                     <h2 class="panel-header">VISUALIZATION</h2>
                     <div class="button-grid">
@@ -76,7 +164,6 @@
                     </div>
                 </div>
 
-                <!-- Anomaly Scanner -->
                 <div class="panel anomaly-panel">
                     <h2 class="panel-header">OCEAN ANOMALY SCANNER</h2>
                     <div class="anomaly-value">+1.9°C</div>
@@ -87,13 +174,9 @@
 
             <!-- Center Stage (3D Canvas) -->
             <section class="center-stage">
-                <div class="disaster-banner">
-                    ⚠️ DISASTER MODE ACTIVE — SIMULATED HAZARD ENVIRONMENT
-                </div>
-                
+                <div class="disaster-banner">⚠️ DISASTER MODE ACTIVE — SIMULATED HAZARD ENVIRONMENT</div>
                 <div id="canvas-container"></div>
 
-                <!-- Floating Data Card -->
                 <div class="floating-card">
                     <h3>ARGO-1024</h3>
                     <div class="data-row"><span class="data-label">Latitude</span><span class="data-val">14.2° N</span></div>
@@ -107,13 +190,11 @@
 
             <!-- Right Sidebar -->
             <aside class="sidebar right-sidebar">
-                <!-- Alerts Panel -->
                 <div class="panel">
                     <div class="panel-header-flex">
                         <h2>ACTIVE ALERTS</h2>
                         <span class="badge">03</span>
                     </div>
-                    
                     <div class="alert-card alert-high">
                         <div class="alert-title">HIGH — Marine Heat Anomaly</div>
                         <div class="alert-desc">Arabian Sea • +1.9°C above reference</div>
@@ -128,7 +209,6 @@
                     </div>
                 </div>
 
-                <!-- Instruments Panel -->
                 <div class="panel">
                     <h2 class="panel-header">NEARBY INSTRUMENTS</h2>
                     <div class="instrument-row">
@@ -140,7 +220,6 @@
                     </div>
                 </div>
 
-                <!-- Copilot Panel -->
                 <div class="panel copilot-panel">
                     <h2 class="panel-header">🤖 OCEAN COPILOT</h2>
                     <p class="copilot-desc">Ask questions about the currently visualized ocean conditions.</p>
@@ -150,7 +229,6 @@
                     </div>
                 </div>
             </aside>
-
         </main>
 
         <!-- Bottom Timeline -->
@@ -168,6 +246,91 @@
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <!-- 3D GLOBE JAVASCRIPT -->
+    <script>
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x060913, 0.003); 
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 0, 4);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = false; 
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xd946ef, 1.5);
+        dirLight.position.set(5, 3, 5);
+        scene.add(dirLight);
+        const blueLight = new THREE.DirectionalLight(0x00f0ff, 0.5); 
+        blueLight.position.set(-5, -3, -5);
+        scene.add(blueLight);
+
+        // Meshes
+        const earthGeo = new THREE.SphereGeometry(1, 64, 64);
+        const earthMat = new THREE.MeshPhongMaterial({
+            color: 0x0a0514, emissive: 0x1a0a2e,
+            transparent: true, opacity: 0.9, shininess: 50
+        });
+        const earth = new THREE.Mesh(earthGeo, earthMat);
+        scene.add(earth);
+
+        const atmosGeo = new THREE.SphereGeometry(1.03, 64, 64);
+        const atmosMat = new THREE.MeshPhongMaterial({
+            color: 0xd946ef, transparent: true, opacity: 0.15,
+            side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        const atmosphere = new THREE.Mesh(atmosGeo, atmosMat);
+        scene.add(atmosphere);
+
+        const starsGeo = new THREE.BufferGeometry();
+        const starsCount = 500;
+        const posArray = new Float32Array(starsCount * 3);
+        for(let i = 0; i < starsCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 8;
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const starsMat = new THREE.PointsMaterial({ size: 0.005, color: 0xffffff, transparent: true, opacity: 0.3 });
+        const stars = new THREE.Points(starsGeo, starsMat);
+        scene.add(stars);
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            earth.rotation.y += 0.0005;
+            atmosphere.rotation.y += 0.0005;
+            stars.rotation.y += 0.0002;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // UI Interactions
+        document.getElementById('depth-slider').addEventListener('input', (e) => {
+            document.getElementById('depth-val').innerText = e.target.value + ' m';
+        });
+        document.getElementById('vert-slider').addEventListener('input', (e) => {
+            document.getElementById('vert-val').innerText = e.target.value + 'x';
+        });
+        document.getElementById('opac-slider').addEventListener('input', (e) => {
+            document.getElementById('opac-val').innerText = e.target.value + '%';
+        });
+
+        // Resize Handling
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+    </script>
 </body>
 </html>
