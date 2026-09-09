@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIH Ocean Disaster & State Monitor</title>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Three.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <!-- The 3D Render Canvas -->
+  <div id="canvas-container"></div>
+
+  <!-- Foreground Interface -->
+  <div class="ui-layer">
+    
+    <div class="header">
+      <h1>OceanSys : Advanced Monitoring</h1>
+      <button class="view-toggle" id="view-toggle-btn">Enter 2D Flat View</button>
+    </div>
+
+    <div class="content">
+      
+      <!-- Left Panel: Science Variables & Depth Explorer -->
+      <div class="left-panel">
+        <div class="panel">
+          <span class="control-label">Ocean State Variables</span>
+          <div class="btn-grid">
+            <button class="var-btn active" data-var="temperature">Temperature</button>
+            <button class="var-btn" data-var="salinity">Salinity</button>
+            <button class="var-btn" data-var="currents">Currents</button>
+            <button class="var-btn" data-var="chlorophyll">Chlorophyll</button>
+          </div>
+          <p class="panel-desc">Select a variable to map onto the 3D globe visualization.</p>
+        </div>
+
+        <div class="panel">
+          <span class="control-label">Depth Exploration : <span id="depth-val" class="accent-text">0</span> m</span>
+          <input type="range" id="depth-slider" min="0" max="11000" value="0" step="10">
+          
+          <div>
+            <div class="stat-box">
+              <span class="stat-label">Water Temp</span>
+              <span class="stat-val" id="temp-val">28.5 °C</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Hydrostatic Pressure</span>
+              <span class="stat-val" id="pressure-val">1 atm</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Light Penetration</span>
+              <span class="stat-val" id="light-val">100%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Disaster Management -->
+      <div class="right-panel">
+        <div class="panel disaster-panel">
+          <span class="control-label text-red">Disaster Command Center</span>
+          
+          <div class="warning-box tsunami-alert">
+            <div class="warning-title">⚠️ Tsunami Early Warning</div>
+            <p class="warning-text">Seismic anomaly detected (M7.8) near the Sunda Trench. Real-time INCOIS buoy monitoring active. Estimated landfall at coastal regions in 45 mins. Evacuation protocols initiated.</p>
+          </div>
+
+          <div class="warning-box cyclone-alert">
+            <div class="warning-title text-orange">🌀 Cyclone Tracker: 'Biparjoy'</div>
+            <p class="warning-text text-light-orange">Severe cyclonic storm tracking over Arabian Sea. Ocean heat content (OHC) extremely high (>100 kJ/cm²), providing ideal conditions for rapid intensification.</p>
+          </div>
+          
+          <div class="warning-box heatwave-alert">
+            <div class="warning-title text-cyan">🌡️ Marine Heatwave Alert</div>
+            <p class="warning-text text-light-cyan">Sea Surface Temperature (SST) +2.5°C above decadal average in the Lakshadweep Sea. Immediate risk of mass coral bleaching observed.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Custom JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
